@@ -1,0 +1,31 @@
+name: Build CarPlay HUD shim
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch m3-toolchain (cross-compiler)
+        run: |
+          rm -rf mazda/m3-toolchain
+          git clone --depth 1 https://github.com/lmagder/m3-toolchain mazda/m3-toolchain
+
+      - name: Install build deps
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+
+      - name: Build release .so
+        working-directory: mazda
+        run: make release
+
+      - name: Upload built .so
+        uses: actions/upload-artifact@v4
+        with:
+          name: libpatch-blmjcicarplay
+          path: mazda/build/release/libpatch-blmjcicarplay.so
